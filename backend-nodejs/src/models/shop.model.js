@@ -6,12 +6,11 @@ const DOCUMENT_NAME = 'Shop'
 const COLLECTION_NAME = 'Shops'
 
 // Declare the Schema of the Mongo model
-var shopSchema = new mongoose.Schema({
+var shopSchema = new Schema({
     name:{
         type:String,
-        required:true,
-        unique:true,
-        index:true,
+        trim: true,
+        maxLength: 150
     },
     email:{
         type:String,
@@ -23,8 +22,13 @@ var shopSchema = new mongoose.Schema({
         required:true,
     },
     verify:{
-        type: Schema, Types, Boolean,
+        type: Schema.Types.Boolean,
         default: false
+    },
+    status:{
+        type: String,
+        enum: ['active', 'inactive'],
+        default: 'inactive'
     },
     roles: {
         type: Array,
@@ -36,4 +40,4 @@ var shopSchema = new mongoose.Schema({
 });
 
 //Export the model
-module.exports = mongoose.model(DOCUMENT_NAME, userSchema);
+module.exports = model(DOCUMENT_NAME, shopSchema);

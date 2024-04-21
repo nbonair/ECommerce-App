@@ -7,7 +7,7 @@ const process = require('process')
 const _SECONDS = 5000
 const countConnect = () => {
     const numConnection = mongoose.connections.length
-    console.log(`Number of connectionS::${numConnection}`)
+    console.log(`Number of connections::${numConnection}`)
 }
 
 const checkOverload = () => {
