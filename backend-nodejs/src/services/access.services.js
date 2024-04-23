@@ -6,6 +6,7 @@ const crypto = require('node:crypto')
 const KeyTokenService = require('./keyToken.service')
 const { createTokensPair } = require('../auth/authUtils')
 const { getInfoData } = require('../utils')
+const { ConflictRequestError, BadRequestError } = require('../../core/error.response')
 const RoleShop = {
     SHOP: 'SHOP',
     WRITER: '0001',
@@ -14,71 +15,42 @@ const RoleShop = {
 }
 
 class AccessService {
-    static signUp = async ({name, email, password}) => {
-        try{
-            const shopObj = await shopModel.findOne({email}).lean()
-            if (shopObj){
-                return {
-                    code: '4001',
-                    message: 'Shop already registered'
-                }
-            }
-            const passwordHash = await bcrypt.hash(password, 10)
+    
+    static signUp = async ({ name, email, password }) => {
+        
+        const shopObj = await shopModel.findOne({ email }).lean()
+        if (shopObj) {
+            throw new BadRequestError('Error: Shop already registered')
+        }
+        const passwordHash = await bcrypt.hash(password, 10)
 
-            const newShop = await shopModel.create({
-                name, email, password: passwordHash, roles: [RoleShop.SHOP]
+        const newShop = await shopModel.create({
+            name, email, password: passwordHash, roles: [RoleShop.SHOP]
+        })
+        if (newShop) {
+
+            const privateKey = crypto.randomBytes(64).toString('hex')
+            const publicKey = crypto.randomBytes(64).toString('hex')
+
+            const keyStore = await KeyTokenService.createKeyToken({
+                userId: newShop._id,
+                publicKey,
+                privateKey
             })
 
-            // Create token for shop to insert items to production database
-            if (newShop){
-                // created privateKey, publicKey using pem and RSA format
-                // const { privateKey, publicKey} = crypto.generateKeyPairSync('rsa', {
-                //     modulusLength: 4096,
-                //     publicKeyEncoding: {
-                //         type: 'pkcs1',
-                //         format: 'pem'
-                //     },
-                //     privateKeyEncoding: {
-                //         type: 'pkcs1',
-                //         format: 'pem'
-                //     }
-                // })
-                const privateKey = crypto.randomBytes(64).toString('hex')
-                const publicKey = crypto.randomBytes(64).toString('hex')
-
-
-                console.log({privateKey, publicKey}) 
-
-                const keyStore = await KeyTokenService.createKeyToken({
-                    userId: newShop._id,
-                    publicKey, 
-                    privateKey
-                })
-
-                if (!keyStore){
-                    return {
-                        code: '',
-                        message:"Generate keys error"
-                    }
-                }
-
-                //create token pair
-                const tokens = await createTokensPair({userId:newShop._id, email}, publicKey, privateKey)
-                console.log(`create Token Success::`, tokens)
-
-                return{
-                    code: 201,
-                    metadata: {
-                        shop:getInfoData({fields: ['_id','name', 'email'], object:newShop}),
-                        tokens
-                    }
-                }
+            if (!keyStore) {
+                throw new BadRequestError("Create Shop Error")
             }
-        } catch (error) {
+
+            //create token pair
+            const tokens = await createTokensPair({ userId: newShop._id, email }, publicKey, privateKey)
+
             return {
-                code: '',
-                message: error.message,
-                status: 'error'
+                code: 201,
+                metadata: {
+                    shop: getInfoData({ fields: ['_id', 'name', 'email'], object: newShop }),
+                    tokens
+                }
             }
         }
 
