@@ -1,4 +1,4 @@
-'use strict'
+
 
 const JWT = require('jsonwebtoken')
 const createTokensPair = async (payload, publicKey, privateKey) => {

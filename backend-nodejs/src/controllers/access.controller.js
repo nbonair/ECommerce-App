@@ -1,4 +1,4 @@
-'use strict';
+;
 
 const AccessService = require("../services/access.services");
 

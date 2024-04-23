@@ -1,4 +1,4 @@
-'use strict'
+
 
 const keytokenModel = require("../models/keytoken.model")
 

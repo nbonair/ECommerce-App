@@ -1,4 +1,4 @@
-'use strict'
+
 
 const { mongoose } = require('mongoose')
 const { countConnect } = require('../helpers/check.connect')
