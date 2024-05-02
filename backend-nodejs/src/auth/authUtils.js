@@ -1,5 +1,3 @@
-
-
 const JWT = require('jsonwebtoken')
 const createTokensPair = async (payload, publicKey, privateKey) => {
     try {
@@ -15,7 +13,7 @@ const createTokensPair = async (payload, publicKey, privateKey) => {
 
         return { accessToken, refreshToken }
     } catch (error) {
-        return error
+        throw error
     }
 }
 
