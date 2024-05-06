@@ -16,6 +16,22 @@ const RoleShop = {
 }
 
 class AccessService {
+
+    static handlerRefreshToken = async (keyStore, user, refreshToken) => {
+        const { userId, email } = user
+        if (keyStore.refreshTokensUsed.includes(refreshToken)){
+            await KeyTokenService.removeKeyById(keyStore._id)
+            throw new Forbidden
+        }
+
+        if(keyStore.refreshToken != refreshToken) throw new AuthFailureError('Shop not registered')
+        
+    }
+
+    static logout = async (keyStore) => {
+        return await KeyTokenService.removeKeyById(keyStore._id)
+    }
+
     static login = async ({ email, password, refreshToken = null }) => {
         /*
             check email
@@ -26,10 +42,9 @@ class AccessService {
         */
         const foundShop = await findByEmail({ email })
         if (!foundShop) throw new BadRequestError('Shop not registered')
-        console.log(foundShop)
         const isMatch = bcrypt.compare(password, foundShop.password)
         if (!isMatch) throw new AuthFailureError('Authentication Error')
-        
+
         //Create token
         const privateKey = createKey()
         const publicKey = createKey()
