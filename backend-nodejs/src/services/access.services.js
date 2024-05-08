@@ -2,7 +2,7 @@ const shopModel = require('../models/shop.model')
 const bcrypt = require('bcrypt')
 const { createTokensPair } = require('../auth/authUtils')
 const { getInfoData } = require('../utils')
-const { ConflictRequestError, BadRequestError, AuthFailureError } = require('../../core/error.response')
+const { ConflictRequestError, BadRequestError, AuthFailureError, ForbiddenError } = require('../../core/error.response')
 
 //services
 const KeyTokenService = require('./keyToken.service')
@@ -19,13 +19,19 @@ class AccessService {
 
     static handlerRefreshToken = async (keyStore, user, refreshToken) => {
         const { userId, email } = user
-        if (keyStore.refreshTokensUsed.includes(refreshToken)){
+        if (keyStore.refreshTokensUsed.includes(refreshToken)) {
             await KeyTokenService.removeKeyById(keyStore._id)
-            throw new Forbidden
+            throw new ForbiddenError
         }
 
-        if(keyStore.refreshToken != refreshToken) throw new AuthFailureError('Shop not registered')
-        
+        if (keyStore.refreshToken != refreshToken) throw new AuthFailureError('Shop not registered')
+
+        const foundShop = await findByEmail({ email })
+
+        if (!foundShop) throw new AuthFailureError('Shop not registered')
+
+        const tokens = await createTokensPair({userId, email}, keyStore.publicKey, keyStore.privateKey )
+
     }
 
     static logout = async (keyStore) => {
