@@ -85,7 +85,7 @@ class AccessService {
     }
 
     static signUp = async ({ name, email, password }) => {
-
+        console.log(req.body)
         const shopObj = await shopModel.findOne({ email }).lean()
         if (shopObj) {
             throw new BadRequestError('Error: Shop already registered')
