@@ -1,3 +1,5 @@
+const { ForbiddenError } = require("../../core/error.response")
+const { asyncHandler } = require("../helpers/asyncHandler")
 const { findByKey } = require("../services/apikey.service")
 
 const HEADER = {
@@ -5,31 +7,17 @@ const HEADER = {
     AUTHORIZATION: 'authorization'
 }
 
-const apiKey = async (req, res, next) => {
-    try {
-        const key = req.headers[HEADER.API_KEY]?.toString()
-        if (!key) {
-            return res.status(403).json({
-                message: 'Forbidden Error'
-            })
-        }
+const apiKey = asyncHandler(async (req, res, next) => {
+    const key = req.headers[HEADER.API_KEY]?.toString()
+    if (!key) throw new ForbiddenError('Missing API key')
+    //check obj APIKey
+    const objKey = await findByKey(key)
 
-        //check obj APIKey
-        const objKey = await findByKey(key)
+    if (!objKey) throw new ForbiddenError('API Key not found')
 
-        if (!objKey) {
-            return res.status(403).json({
-                message: 'Forbidden Error'
-            })
-        }
-
-        req.objKey = objKey
-        return next()
-    } catch (error) {
-        console.error('Error in apiKey middleware:', error);
-        return res.status(500).json({ message: 'Internal Server Error' });
-    }
-}
+    req.objKey = objKey
+    return next()
+})
 
 const permission = (permission) => {
     return (req, res, next) => {
