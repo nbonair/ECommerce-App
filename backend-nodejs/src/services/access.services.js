@@ -21,7 +21,7 @@ class AccessService {
         const { userId, email } = user
         if (keyStore.refreshTokensUsed.includes(refreshToken)) {
             await KeyTokenService.removeKeyById(keyStore._id)
-            throw new ForbiddenError
+            throw new ForbiddenError('Key Token Error')
         }
 
         if (keyStore.refreshToken != refreshToken) throw new AuthFailureError('Shop not registered')
@@ -31,6 +31,20 @@ class AccessService {
         if (!foundShop) throw new AuthFailureError('Shop not registered')
 
         const tokens = await createTokensPair({userId, email}, keyStore.publicKey, keyStore.privateKey )
+
+        await keyStore.update({
+            $set: {
+                refreshToken: tokens.refreshToken
+            },
+            $addToSet: {
+                refreshTokensUsed: refreshToken
+            }
+        })
+
+        return {
+            user,
+            tokens
+        }
 
     }
 
@@ -47,6 +61,7 @@ class AccessService {
             get data/login
         */
         const foundShop = await findByEmail({ email })
+        console.log(`Found Shop: ${foundShop}`)
         if (!foundShop) throw new BadRequestError('Shop not registered')
         const isMatch = bcrypt.compare(password, foundShop.password)
         if (!isMatch) throw new AuthFailureError('Authentication Error')
@@ -58,6 +73,7 @@ class AccessService {
 
         // Insert to db
         await KeyTokenService.createKeyToken({ userId: foundShop._id, publicKey, privateKey, refreshToken: tokens.refreshToken })
+        
         return {
             code: 200,
             metadata: {

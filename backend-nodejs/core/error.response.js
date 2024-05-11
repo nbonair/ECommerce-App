@@ -26,7 +26,7 @@ class BadRequestError extends ErrorResponse{
 }
 
 class AuthFailureError extends ErrorResponse{
-    constructor(message = ReasonMessage.FORBIDDEN, statusCode = StatusCode.FORBIDDEN) {
+    constructor(message = ReasonMessage.UNAUTHORIZED, statusCode = StatusCode.UNAUTHORIZED) {
         super(message, statusCode)
     }
 }
