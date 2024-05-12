@@ -8,11 +8,11 @@ class AccessController {
         new SuccessResponse({
             message: "Get Token Successfully",
             metadata: await AccessService.handlerRefreshToken({
-                refreshToken: res.refreshToken,
-                keyStore: res.keyStore,
-                user: res.user
-            }).send(res)
-        })
+                refreshToken: req.refreshToken,
+                keyStore: req.keyStore,
+                user: req.user
+            })
+        }).send(res)
     }
 
     login = async (req, res, next) => {

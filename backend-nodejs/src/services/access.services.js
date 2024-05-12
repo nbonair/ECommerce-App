@@ -17,30 +17,32 @@ const RoleShop = {
 
 class AccessService {
 
-    static handlerRefreshToken = async (keyStore, user, refreshToken) => {
+    static handlerRefreshToken = async ({ keyStore, user, refreshToken }) => {
         const { userId, email } = user
         if (keyStore.refreshTokensUsed.includes(refreshToken)) {
             await KeyTokenService.removeKeyById(keyStore._id)
-            throw new ForbiddenError('Key Token Error')
+            throw new ForbiddenError('Key Token Error. Please Login again')
         }
 
         if (keyStore.refreshToken != refreshToken) throw new AuthFailureError('Shop not registered')
 
         const foundShop = await findByEmail({ email })
-
         if (!foundShop) throw new AuthFailureError('Shop not registered')
 
-        const tokens = await createTokensPair({userId, email}, keyStore.publicKey, keyStore.privateKey )
+        const tokens = await createTokensPair({ userId, email }, keyStore.publicKey, keyStore.privateKey)
 
-        await keyStore.update({
-            $set: {
-                refreshToken: tokens.refreshToken
-            },
-            $addToSet: {
-                refreshTokensUsed: refreshToken
-            }
-        })
-
+        // await keyStore.update({
+        //     $set: {
+        //         refreshToken: tokens.refreshToken
+        //     },
+        //     $addToSet: {
+        //         refreshTokensUsed: refreshToken
+        //     }
+        // })
+        keyStore.refreshToken = tokens.refreshToken;
+        keyStore.refreshTokensUsed.addToSet(refreshToken); // Assuming this is a Set
+        await keyStore.save();
+        
         return {
             user,
             tokens
@@ -61,9 +63,8 @@ class AccessService {
             get data/login
         */
         const foundShop = await findByEmail({ email })
-        console.log(`Found Shop: ${foundShop}`)
         if (!foundShop) throw new BadRequestError('Shop not registered')
-        const isMatch = bcrypt.compare(password, foundShop.password)
+        const isMatch = await bcrypt.compare(password, foundShop.password)
         if (!isMatch) throw new AuthFailureError('Authentication Error')
 
         //Create token
@@ -73,7 +74,7 @@ class AccessService {
 
         // Insert to db
         await KeyTokenService.createKeyToken({ userId: foundShop._id, publicKey, privateKey, refreshToken: tokens.refreshToken })
-        
+
         return {
             code: 200,
             metadata: {
