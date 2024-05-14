@@ -11,23 +11,34 @@ const HEADER = {
     REFRESH_TOKEN: 'x-rtoken-id'
 }
 
-const createTokensPair = async (payload, publicKey, privateKey) => {
+const createTokensPair = async (payload, privateKey, publicKey) => {
     try {
-        // accessToken
+        const accessToken = JWT.sign(payload, privateKey, {
+            expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRY,
+            algorithm: process.env.JWT_ALGORITHM
+        });
 
-        const accessToken = await JWT.sign(payload, privateKey, {
-            expiresIn: '2 days'
-        })
+        const refreshToken = JWT.sign(payload, privateKey, {
+            expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRY,
+            algorithm: process.env.JWT_ALGORITHM
+        });
 
-        const refreshToken = await JWT.sign(payload, privateKey, {
-            expiresIn: '7 days'
-        })
-
-        return { accessToken, refreshToken }
+        return { accessToken, refreshToken };
     } catch (error) {
-        throw error
+        console.error('Error creating tokens pair:', error);
+        throw new Error('Token creation failed');
     }
-}
+};
+
+const verifyToken = async (token, key) => {
+    try {
+        return JWT.verify(token, key, { algorithms: [process.env.JWT_ALGORITHM] });
+    } catch (error) {
+        console.error('Token verification error:', error);
+        throw new AuthFailureError('Invalid token');
+    }
+};
+
 
 const authentication = asyncHandler(async (req, res, next) => {
     /*
@@ -40,8 +51,7 @@ const authentication = asyncHandler(async (req, res, next) => {
         6 - return next
     */
     const userId = req.headers[HEADER.CLIENT_ID]
-    
-    if (!userId) throw new AuthFailureError('Invalid Request')
+    if (!userId) throw new AuthFailureError('Invalid Request. Client ID missing')
 
     const keyStore = await findByUserId(userId)
     if (!keyStore) throw new NotFoundError('Key Store Not Found')
@@ -58,7 +68,7 @@ const authentication = asyncHandler(async (req, res, next) => {
             req.user = decodedUser
             req.refreshToken = refreshToken
             return next()
-        } catch (error){
+        } catch (error) {
             throw error
         }
     }

@@ -21,7 +21,7 @@ class AccessService {
         const { userId, email } = user
         if (keyStore.refreshTokensUsed.includes(refreshToken)) {
             await KeyTokenService.removeKeyById(keyStore._id)
-            throw new ForbiddenError('Key Token Error. Please Login again')
+            throw new ForbiddenError('Key Token Verification Error. Please Login again')
         }
 
         if (keyStore.refreshToken != refreshToken) throw new AuthFailureError('Shop not registered')
@@ -40,9 +40,9 @@ class AccessService {
         //     }
         // })
         keyStore.refreshToken = tokens.refreshToken;
-        keyStore.refreshTokensUsed.addToSet(refreshToken); // Assuming this is a Set
+        keyStore.refreshTokensUsed.addToSet(refreshToken); 
         await keyStore.save();
-        
+
         return {
             user,
             tokens
