@@ -24,7 +24,7 @@ class AccessService {
             throw new ForbiddenError('Key Token Verification Error. Please Login again')
         }
 
-        if (keyStore.refreshToken != refreshToken) throw new AuthFailureError('Shop not registered')
+        if (keyStore.refreshToken != refreshToken) throw new AuthFailureError('Invalid refresh token')
 
         const foundShop = await findByEmail({ email })
         if (!foundShop) throw new AuthFailureError('Shop not registered')
@@ -40,8 +40,10 @@ class AccessService {
         //     }
         // })
         keyStore.refreshToken = tokens.refreshToken;
-        keyStore.refreshTokensUsed.addToSet(refreshToken); 
-        await keyStore.save();
+        await keyStore.updateOne({
+            $set: { refreshToken: tokens.refreshToken },
+            $addToSet: { refreshTokensUsed: refreshToken }
+        });
 
         return {
             user,
@@ -86,7 +88,6 @@ class AccessService {
     }
 
     static signUp = async ({ name, email, password }) => {
-        console.log(req.body)
         const shopObj = await shopModel.findOne({ email }).lean()
         if (shopObj) {
             throw new BadRequestError('Error: Shop already registered')
@@ -96,7 +97,6 @@ class AccessService {
         const newShop = await shopModel.create({
             name, email, password: passwordHash, roles: [RoleShop.SHOP]
         })
-        console.log(newShop)
         if (newShop) {
 
             const privateKey = createKey()
