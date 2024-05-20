@@ -71,11 +71,13 @@ class AccessService {
 
         //Create token
         const privateKey = createKey()
-        const publicKey = createKey()
-        const tokens = await createTokensPair({ userId: foundShop._id, email }, publicKey, privateKey)
+        const tokens = await createTokensPair({ userId: foundShop._id, email }, privateKey)
+        // Comment out due to default HMAC implementation
+        // const publicKey = createKey()
+        // const tokens = await createTokensPair({ userId: foundShop._id, email }, publicKey, privateKey)
 
         // Insert to db
-        await KeyTokenService.createKeyToken({ userId: foundShop._id, publicKey, privateKey, refreshToken: tokens.refreshToken })
+        await KeyTokenService.createKeyToken({ userId: foundShop._id, privateKey, refreshToken: tokens.refreshToken })
 
         return {
             code: 200,

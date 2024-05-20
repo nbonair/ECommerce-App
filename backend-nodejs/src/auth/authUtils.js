@@ -11,16 +11,16 @@ const HEADER = {
     REFRESH_TOKEN: 'x-rtoken-id'
 }
 
-const createTokensPair = async (payload, privateKey, publicKey) => {
+const createTokensPair = async (payload, privateKey) => {
     try {
         const accessToken = JWT.sign(payload, privateKey, {
             expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRY,
-            algorithm: process.env.JWT_ALGORITHM
+            // algorithm: process.env.JWT_ALGORITHM
         });
 
         const refreshToken = JWT.sign(payload, privateKey, {
             expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRY,
-            algorithm: process.env.JWT_ALGORITHM
+            // algorithm: process.env.JWT_ALGORITHM
         });
 
         return { accessToken, refreshToken };
@@ -32,7 +32,7 @@ const createTokensPair = async (payload, privateKey, publicKey) => {
 
 const verifyToken = async (token, key) => {
     try {
-        return JWT.verify(token, key, { algorithms: [process.env.JWT_ALGORITHM] });
+        return JWT.verify(token, key);
     } catch (error) {
         console.error('Token verification error:', error);
         throw new AuthFailureError('Invalid token');
@@ -80,6 +80,7 @@ const authentication = asyncHandler(async (req, res, next) => {
         const decodedUser = JWT.verify(accessToken, keyStore.privateKey)
         if (userId !== decodedUser.userId) throw new AuthFailureError('Invalid User')
         req.keyStore = keyStore
+        req.user = decodedUser //{userId, email}
         return next()
     } catch (error) {
         throw error
