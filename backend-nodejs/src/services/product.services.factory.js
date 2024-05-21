@@ -1,19 +1,20 @@
-const { product, clothing, electronic, furniture } = require('../models/product.model')
+const { product, clothing, electronic } = require('../models/product.model')
 const { BadRequestError } = require('../../core/error.response')
+
 class ProductFactory {
     /*
         types:
     */
-    static productRegistry = {}
-
-    static registerProductType(type, classRef) {
-        ProductFactory.productRegistry[type] = classRef
-    }
-
     static async createProduct(type, payload) {
-        const productClass = ProductFactory.productRegistry[type]
-        if (!productClass) throw new BadRequestError(`Invalid Product Type: ${type}`)
-        return new productClass(payload).createProduct()
+        switch (type){
+            case 'Clothing':
+                return new Clothing(payload).createProduct()
+            case 'Electronic':
+                return new Electronic(payload).createProduct()
+            default:
+                throw new BadRequestError(`Invalid Product Type: ${payload}`)
+            
+        }
     }
 }
 
@@ -56,7 +57,7 @@ class Clothing extends Product {
     }
 }
 
-class Electronics extends Product {
+class Electronic extends Product {
     async createProduct() {
         const newElectronic = await electronic.create({
             ...this.product_attributes,
@@ -69,30 +70,5 @@ class Electronics extends Product {
         return newProduct
     }
 }
-
-class Furniture extends Product {
-    async createProduct() {
-        const newFurniture = await furniture.create({
-            ...this.product_attributes,
-            product_shop: this.product_shop
-        })
-        if (!newFurniture) throw new BadRequestError('Create new Furniture Error')
-
-        const newProduct = await super.createProduct(newFurniture._id)
-        if (!newProduct) throw new BadRequestError('Create Product Error')
-        return newProduct
-    }
-}
-
-const productTypeConfig = {
-    Clothing: Clothing,
-    Furniture: Furniture,
-    Electronics: Electronics,
-}
-
-
-Object.keys(productTypeConfig).forEach(type => {
-    ProductFactory.registerProductType(type, productTypeConfig[type])
-})
 
 module.exports = ProductFactory;
