@@ -94,6 +94,7 @@ class AccessService {
         if (shopObj) {
             throw new BadRequestError('Error: Shop already registered')
         }
+        console.log(email)
         const passwordHash = await bcrypt.hash(password, 10)
 
         const newShop = await shopModel.create({
@@ -102,11 +103,10 @@ class AccessService {
         if (newShop) {
 
             const privateKey = createKey()
-            const publicKey = createKey()
             //create token pair and refresh token
-            const tokens = await createTokensPair({ userId: newShop._id, email }, publicKey, privateKey)
+            const tokens = await createTokensPair({ userId: newShop._id, email }, privateKey)
 
-            await KeyTokenService.createKeyToken({ userId: newShop._id, publicKey, privateKey, refreshToken: tokens.refreshToken, })
+            await KeyTokenService.createKeyToken({ userId: newShop._id, privateKey, refreshToken: tokens.refreshToken, })
 
             return {
                 code: 201,
