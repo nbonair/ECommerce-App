@@ -12,7 +12,6 @@ const apiKey = asyncHandler(async (req, res, next) => {
     if (!key) throw new ForbiddenError('Missing API key')
     //check obj APIKey
     const objKey = await findByKey(key)
-
     if (!objKey) throw new ForbiddenError('API Key not found')
 
     req.objKey = objKey

@@ -5,6 +5,10 @@ const findByKey = async (key) => {
     return objKey
 }
 
+const createNewKey = async () => {
+    const newKey = await apikeyModel.create({ key: crypto.randomBytes(64).toString('hex'), permissions: '0' })
+}
+
 module.exports = {
     findByKey
 }
