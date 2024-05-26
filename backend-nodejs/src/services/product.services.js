@@ -1,6 +1,6 @@
 const { product, clothing, electronic, furniture } = require('../models/product.model')
 const { BadRequestError } = require('../../core/error.response')
-const { findAllDrafts, publishProduct, findAllPublished, archivedProduct, searchProductPublic } = require('../models/repositories/product.repo')
+const { findAllDrafts, publishProduct, findAllPublished, archivedProduct, searchProductPublic, getAllProducts, getProduct } = require('../models/repositories/product.repo')
 const shopModel = require('../models/shop.model')
 class ProductFactory {
     static productRegistry = {}
@@ -15,6 +15,11 @@ class ProductFactory {
         return new productClass(payload).createProduct()
     }
 
+    static async updateProduct() {
+
+    }
+
+    // PUT
     static async publishProduct({ product_shop, product_id }) {
         return await publishProduct({ product_shop, product_id })
     }
@@ -23,10 +28,7 @@ class ProductFactory {
         return await archivedProduct({ product_shop, product_id })
     }
 
-    static async searchProduct({ keySearch }) {
-        return await searchProductPublic(keySearch)
-    }
-
+    // QUERY
     static async findAllDrafts({ product_shop, limit = 50, skip = 0 }) {
         const query = { product_shop, isDraft: true }
         return await findAllDrafts({ query, limit, skip })
@@ -35,6 +37,21 @@ class ProductFactory {
     static async findAllPublished({ product_shop, limit = 50, skip = 0 }) {
         const query = { product_shop, isPublished: true }
         return await findAllPublished({ query, limit, skip })
+    }
+
+    static async searchProduct({ keySearch }) {
+        return await searchProductPublic(keySearch)
+    }
+
+    static async getAllProducts({ limit = 50, sort = 'ctime', page = 1, filter = { isPublished: true } }) {
+        return await getAllProducts({
+            limit, sort, page, filter,
+            select: ['product_name', 'product_price', 'product_thumb']
+        })
+    }
+
+    static async getProduct({ product_id }) {
+        return await getProduct({ product_id, unSelect: ['__v','product_variations'] })
     }
 }
 

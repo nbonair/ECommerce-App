@@ -6,6 +6,8 @@ const router = express.Router()
 
 //Public User
 router.get('/search/:keySearch', asyncHandler(productController.getSearchProduct))
+router.get('', asyncHandler(productController.getAllProducts))
+router.get('/:product_id', asyncHandler(productController.getProduct))
 
 // Authentication Middleware
 router.use(authentication)

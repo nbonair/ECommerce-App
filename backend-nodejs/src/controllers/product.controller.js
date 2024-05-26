@@ -65,6 +65,22 @@ class ProductController {
             })
         }).send(res)
     }
+
+    getAllProducts= async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Get all published product successfully',
+            metadata: await ProductService.getAllProducts(req.query)
+        }).send(res)
+    }
+    
+    getProduct = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Get product successfully',
+            metadata: await ProductService.getProduct({
+                product_id: req.params.product_id
+            })
+        }).send(res)
+    }
 }
 
 module.exports = new ProductController()
