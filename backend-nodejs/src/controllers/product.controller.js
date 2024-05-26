@@ -11,6 +11,60 @@ class ProductController {
             })
         }).send(res)
     }
+
+    publishProduct = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Published Product Successfully',
+            metadata: await ProductService.publishProduct({
+                product_shop: req.user.userId,
+                product_id: req.params.id
+            })
+        }).send(res)
+    }
+
+    archiveProduct = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Archived Product Successfully',
+            metadata: await ProductService.archivedProduct({
+                product_shop: req.user.userId,
+                product_id: req.params.id
+            })
+        }).send(res)
+    }
+
+    //Query
+    /**
+     * @desc Get all draft for specific shop
+     * @param {*} req 
+     * @param {*} res 
+     * @param {*} next 
+     */
+    getAllDrafts = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Get all draft list successfully',
+            metadata: await ProductService.findAllDrafts({
+                product_shop: req.user.userId
+            })
+        }).send(res)
+    }
+
+    getAllPublished = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Get all published list successfully',
+            metadata: await ProductService.findAllPublished({
+                product_shop: req.user.userId
+            })
+        }).send(res)
+    }
+
+    getSearchProduct = async (req, res, next) => {
+        new SuccessResponse({
+            message: 'Get all product for search',
+            metadata: await ProductService.searchProduct({
+                keySearch: req.params
+            })
+        }).send(res)
+    }
 }
 
 module.exports = new ProductController()
