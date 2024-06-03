@@ -11,7 +11,11 @@ router.get('/:product_id', asyncHandler(productController.getProduct))
 
 // Authentication Middleware
 router.use(authentication)
+
+//Product 
 router.post('', asyncHandler(productController.createProduct))
+router.patch('/:productId', asyncHandler(productController.updateProduct))
+
 router.post('/publish/:id', asyncHandler(productController.publishProduct))
 router.post('/archive/:id', asyncHandler(productController.archiveProduct))
 

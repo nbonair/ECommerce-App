@@ -40,6 +40,15 @@ const searchProductPublic = async ({ keySearch }) => {
     return results
 }
 
+//Patch
+
+const updateProductById = async({productId, payload, model, isNew = true}) =>{
+    return await model.findByIdAndUpdate(productId, payload, {
+        new: isNew
+    })
+    
+}
+
 //Post
 const publishProduct = async ({ product_shop, product_id }) => {
     const foundProduct = await product.findOne({
@@ -82,5 +91,6 @@ module.exports = {
     getProduct,
     publishProduct,
     archivedProduct,
-    searchProductPublic
+    searchProductPublic,
+    updateProductById
 }
