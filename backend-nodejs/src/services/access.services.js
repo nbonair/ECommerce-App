@@ -31,14 +31,6 @@ class AccessService {
 
         const tokens = await createTokensPair({ userId, email }, keyStore.publicKey, keyStore.privateKey)
 
-        // await keyStore.update({
-        //     $set: {
-        //         refreshToken: tokens.refreshToken
-        //     },
-        //     $addToSet: {
-        //         refreshTokensUsed: refreshToken
-        //     }
-        // })
         keyStore.refreshToken = tokens.refreshToken;
         await keyStore.updateOne({
             $set: { refreshToken: tokens.refreshToken },
@@ -72,11 +64,6 @@ class AccessService {
         //Create token
         const privateKey = createKey()
         const tokens = await createTokensPair({ userId: foundShop._id, email }, privateKey)
-        // Comment out due to default HMAC implementation
-        // const publicKey = createKey()
-        // const tokens = await createTokensPair({ userId: foundShop._id, email }, publicKey, privateKey)
-
-        // Insert to db
         await KeyTokenService.createKeyToken({ userId: foundShop._id, privateKey, refreshToken: tokens.refreshToken })
 
         return {
