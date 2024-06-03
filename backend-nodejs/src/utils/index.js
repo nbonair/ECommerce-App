@@ -17,13 +17,10 @@ const validateNestedObjectParser = obj => {
     if (obj === null || typeof obj !== 'object') {
         return obj;
     }
-
-    // Create a copy of the object to avoid mutating the original
     const newObj = Array.isArray(obj) ? [] : {};
 
     Object.keys(obj).forEach(key => {
         const value = obj[key];
-
         // Recursively clean nested objects
         if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
             newObj[key] = validateNestedObjectParser(value);
