@@ -1,5 +1,5 @@
 const { ForbiddenError } = require("../../core/error.response")
-const { asyncHandler } = require("../helpers/asyncHandler")
+const { asyncHandler } = require("../utils/asyncHandler")
 const { findByKey } = require("../services/apikey.service")
 
 const HEADER = {

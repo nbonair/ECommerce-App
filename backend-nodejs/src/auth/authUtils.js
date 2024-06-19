@@ -1,5 +1,5 @@
 const JWT = require('jsonwebtoken')
-const { asyncHandler } = require('../helpers/asyncHandler')
+const { asyncHandler } = require('../utils/asyncHandler')
 const { AuthFailureError, NotFoundError } = require('../../core/error.response')
 const keytokenModel = require('../models/keytoken.model')
 const { findByUserId } = require('../services/keyToken.service')
