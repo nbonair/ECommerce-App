@@ -92,5 +92,5 @@ module.exports = {
     publishProduct,
     archivedProduct,
     searchProductPublic,
-    updateProductById
+    updateProductById,
 }

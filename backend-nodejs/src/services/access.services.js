@@ -81,7 +81,6 @@ class AccessService {
         if (shopObj) {
             throw new BadRequestError('Error: Shop already registered')
         }
-        console.log(email)
         const passwordHash = await bcrypt.hash(password, 10)
 
         const newShop = await shopModel.create({
