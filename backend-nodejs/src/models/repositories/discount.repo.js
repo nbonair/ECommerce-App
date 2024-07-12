@@ -32,6 +32,12 @@ const findAllDiscountCodesSelect = async ({
     return products
 }
 
+const findDiscountByCode = async ({model, filter}) => {
+    return await model.findOne({filter}).lean();
+}
+
 module.exports = {
     findAllDiscountCodesUnselect,
+    findAllDiscountCodesSelect,
+    findDiscountByCode
 }

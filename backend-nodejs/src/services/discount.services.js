@@ -1,6 +1,6 @@
 const { BadRequestError, NotFoundError } = require('../../core/error.response');
 const discount = require('../models/discount.model');
-const { findAllDiscountCodesUnselect } = require('../models/repositories/discount.repo');
+const { findAllDiscountCodesUnselect, findDiscountByCode } = require('../models/repositories/discount.repo');
 const { queryAllProduct } = require('../models/repositories/product.repo');
 const { convertToObjectId } = require('../utils');
 
@@ -24,11 +24,13 @@ class DiscountServices {
         if (currentDate < startDate || currentDate > endDate) {
             throw new BadRequestError('Discount code expired');
         }
-
-        const foundDiscount = await discount.findOne({
-            discount_code: code,
-            discount_shopId: convertToObjectId(shopId)
-        }).lean();
+        const foundDiscount = await findDiscountByCode({
+            model: discount,
+            filter: {
+                discount_code: code,
+                discount_shopId: convertToObjectId(shopId)
+            }
+        });
 
         if (foundDiscount && foundDiscount.discount_is_active) {
             throw new BadRequestError('Discount already exists');
@@ -64,10 +66,12 @@ class DiscountServices {
     static async getAllDiscountCodesWithProduct({
         code, shopId, userId, limit, page
     }) {
-        const foundDiscount = await discount.findOne({
-            discount_code: code,
-            discount_shopId: convertToObjectId(shopId)
-        }).lean();
+        const foundDiscount = await findDiscountByCode({
+            model: discount,
+            filter: {
+                discount_code: code,
+            }
+        });
 
         if (!foundDiscount || !foundDiscount.discount_is_active) {
             throw new NotFoundError('Discount not exist');
@@ -107,7 +111,7 @@ class DiscountServices {
 
     static async getAllDiscountCodesByShop({
         limit, page, shopId
-    }){
+    }) {
         const discounts = await findAllDiscountCodesUnselect({
             limit: +limit,
             page: +page,
@@ -120,6 +124,61 @@ class DiscountServices {
         });
 
         return discounts
+    }
+
+    static async getDiscountAmount({ codeId, userId, shopId, products }) {
+        const foundDiscount = await findDiscountByCode({
+            model: discount,
+            filter: {
+                discount_code: codeId,
+                discount_shopId: convertToObjectId(shopId)
+            }
+        });
+
+        if (!foundDiscount) throw new NotFoundError('Discount not exist');
+
+        const {
+            discount_is_active,
+            discount_max_uses,
+            discount_start_date,
+            discount_end_date,
+            discount_min_order_value,
+            discount_max_uses_per_user,
+            discount_users_used,
+            discount_value
+        } = foundDiscount;
+
+        if (!discount_is_active) throw new BadRequestError('Discount expired');
+        if (!discount_max_uses) throw new BadRequestError('No available discount left');
+        if ((new Date() > discount_end_date) || (new Date() < discount_start_date)) throw new BadRequestError('Discount not available');
+        
+        // Check total order in discount range
+        let totalOrder = products.reduce((acc, product) => acc + (product.quantity) * product.price, 0)
+        if (discount_min_order_value > 0) {
+            if (totalOrder < discount_min_order_value) throw new BadRequestError(`Discount requires a minimum order value ${discount_min_order_value}`);
+        }
+
+        //Check if user already reach limit use
+        if (discount_max_uses_per_user > 0){
+            let discountUsedAmount = discount_users_used.reduce((acc, user) => {
+                if (user.userId === userId) {
+                    return acc + 1;
+                }
+                return acc;
+            }, 0);
+
+            if (discountUsedAmount) {
+                if (discountUsedAmount > discount_max_uses_per_user) throw BadRequestError('Discount reach use limit');
+            }
+        }
+
+        const amount = discount_type ==='fixed_amount' ? discount_value : totalOrder*(discount_value/100);
+
+        return {
+            totalOrder,
+            discount: amount,
+            totalPrice: totalOrder - amount
+        }
     }
 }
 
