@@ -151,7 +151,7 @@ class DiscountServices {
         if (!discount_is_active) throw new BadRequestError('Discount expired');
         if (!discount_max_uses) throw new BadRequestError('No available discount left');
         if ((new Date() > discount_end_date) || (new Date() < discount_start_date)) throw new BadRequestError('Discount not available');
-        
+
         // Check total order in discount range
         let totalOrder = products.reduce((acc, product) => acc + (product.quantity) * product.price, 0)
         if (discount_min_order_value > 0) {
@@ -159,7 +159,7 @@ class DiscountServices {
         }
 
         //Check if user already reach limit use
-        if (discount_max_uses_per_user > 0){
+        if (discount_max_uses_per_user > 0) {
             let discountUsedAmount = discount_users_used.reduce((acc, user) => {
                 if (user.userId === userId) {
                     return acc + 1;
@@ -172,13 +172,61 @@ class DiscountServices {
             }
         }
 
-        const amount = discount_type ==='fixed_amount' ? discount_value : totalOrder*(discount_value/100);
+        const amount = discount_type === 'fixed_amount' ? discount_value : totalOrder * (discount_value / 100);
 
         return {
             totalOrder,
             discount: amount,
             totalPrice: totalOrder - amount
         }
+    }
+
+    static async deleteDiscountCode({ shopId, codeId }) {
+        const foundDiscount = await findDiscountByCode({
+            model: discount,
+            filter: {
+                discount_code: codeId,
+                discount_shopId: convertToObjectId(shopId)
+            }
+        });
+
+        if (foundDiscount) {
+            // Check current state of this discount
+            // Store into archived code db
+
+            // Delete discount
+            const deletedDiscount = await discount.findOneAndDelete(foundDiscount);
+            return deletedDiscount
+        } else {
+            throw new NotFoundError('Cannot find this discount code');
+        }
+    }
+
+    /*
+        Cancel discount code    
+    */
+    static async cancelDiscountCode({ codeId, shopId, userId }) {
+        const foundDiscount = await findDiscountByCode({
+            model: discount,
+            filter: {
+                discount_code: codeId,
+                discount_shopId: convertToObjectId(shopId)
+            }
+        });
+
+        if (!foundDiscount) throw new NotFoundError('Discount does not exist');
+
+        const result = await discount.findByIdAndUpdate(foundDiscount._id, {
+            $pull: {
+                discount_users_used: userId,
+            },
+            $inc: {
+                discount_max_uses: 1,
+                discount_uses_count: -1
+            }
+        });
+
+        return result
     }
 }
 
