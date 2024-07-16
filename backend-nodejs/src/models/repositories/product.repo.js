@@ -93,4 +93,5 @@ module.exports = {
     archivedProduct,
     searchProductPublic,
     updateProductById,
+    queryAllProduct
 }

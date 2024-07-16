@@ -33,7 +33,7 @@ const findAllDiscountCodesSelect = async ({
 }
 
 const findDiscountByCode = async ({model, filter}) => {
-    return await model.findOne({filter}).lean();
+    return await model.findOne(filter).lean();
 }
 
 module.exports = {

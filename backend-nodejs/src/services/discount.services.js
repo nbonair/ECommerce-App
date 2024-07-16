@@ -7,11 +7,10 @@ const { convertToObjectId } = require('../utils');
 class DiscountServices {
     static async createDiscountCode(payload) {
         const {
-            code, start_date, end_date, is_active,
-            shopId, min_order_value, product_ids, applies_to, user_used,
-            name, description, type, value, max_value, max_uses, uses_count, max_uses_per_user
+            name, description, shopId, type, value, max_value, code, start_date, end_date, max_uses, user_used,
+            uses_count, users_used, max_uses_per_user, min_order_value, created_by, 
+            is_active, applies_to, product_ids
         } = payload;
-
         // Validate dates
         const startDate = new Date(start_date);
         const endDate = new Date(end_date);
@@ -31,7 +30,7 @@ class DiscountServices {
                 discount_shopId: convertToObjectId(shopId)
             }
         });
-
+        console.log(foundDiscount)
         if (foundDiscount && foundDiscount.discount_is_active) {
             throw new BadRequestError('Discount already exists');
         }

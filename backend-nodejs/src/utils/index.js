@@ -1,7 +1,12 @@
 const _ = require('lodash')
 const { Types } = require('mongoose')
 
-const convertToObjectId = id => Types.ObjectId(id)
+const convertToObjectId = (id) => {
+    if (!id || typeof id !== 'string') {
+        throw new Error('Invalid id provided. Must be a non-empty string.');
+    }
+    return new Types.ObjectId(id);
+};
 
 const getInfoData = ({ fields = [], object = {} }) => {
     return _.pick(object, fields)

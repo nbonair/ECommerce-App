@@ -9,7 +9,7 @@ class DiscountController {
                 ...req.body,
                 shopId: req.user.userId //ShopId
             })
-        });
+        }).send(res);
     }
 
     getAllDiscountCode = async (req, res, next) => {
@@ -19,7 +19,7 @@ class DiscountController {
                 ...req.query,
                 shopId: req.user.userId //ShopId
             })
-        });
+        }).send(res);
     }
 
 
@@ -29,7 +29,7 @@ class DiscountController {
             metadata: await DiscountServices.getDiscountAmount({
                 shopId: req.user.userId
             })
-        });
+        }).send(res);
     }
 
     getAllDiscountCodesByShop = async (req, res, next) => {
@@ -39,7 +39,7 @@ class DiscountController {
                 ...req.body,
                 shopId: req.user.userId //ShopId
             })
-        });
+        }).send(res);
     }
 
     getAllDiscountCodesWithProduct = async (req, res, next) => {
@@ -48,7 +48,7 @@ class DiscountController {
             metadata: await DiscountServices.getAllDiscountCodesWithProduct({
                 ...req.query
             })
-        });
+        }).send(res);
     }
 }
 
