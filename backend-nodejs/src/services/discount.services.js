@@ -144,7 +144,8 @@ class DiscountServices {
             discount_min_order_value,
             discount_max_uses_per_user,
             discount_users_used,
-            discount_value
+            discount_value, 
+            discount_type,
         } = foundDiscount;
 
         if (!discount_is_active) throw new BadRequestError('Discount expired');

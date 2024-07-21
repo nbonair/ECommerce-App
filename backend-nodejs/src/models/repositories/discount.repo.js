@@ -5,7 +5,7 @@ const findAllDiscountCodesUnselect = async ({
 }) => {
     const skip = (page - 1) * limit
     const sortBy = sort === 'ctime' ? { _id: -1 } : { _id: 1 }
-    const documents = await model.find(filter)
+    const products = await model.find(filter)
         .sort(sortBy)
         .skip(skip)
         .limit(limit)
@@ -32,7 +32,7 @@ const findAllDiscountCodesSelect = async ({
     return products
 }
 
-const findDiscountByCode = async ({model, filter}) => {
+const findDiscountByCode = async ({ model, filter }) => {
     return await model.findOne(filter).lean();
 }
 

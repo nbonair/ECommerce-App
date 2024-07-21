@@ -27,7 +27,7 @@ class DiscountController {
         new SuccessResponse({
             message: 'Successfully get discount amount',
             metadata: await DiscountServices.getDiscountAmount({
-                shopId: req.user.userId
+                ...req.body
             })
         }).send(res);
     }
