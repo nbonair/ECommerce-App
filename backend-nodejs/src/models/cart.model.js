@@ -1,6 +1,6 @@
 const { model, Schema } = require('mongoose')
 
-const DCOCUMENT_NAME = "Cart"
+const DOCUMENT_NAME = "Cart"
 const COLLECTION_NAME = "carts"
 
 const cartSchema = new Schema({
@@ -11,10 +11,23 @@ const cartSchema = new Schema({
     },
     cart_products: {
         type: Array, required: true, default: []
+    },
+    cart_count_product: {
+        type: Number,
+        default: 0
+    },
+    cart_userId: {
+        type: Schema.Types.ObjectId,
+        required: true
     }
 }, {
     collection: COLLECTION_NAME,
-    timestamps: true
+    timeseries: {
+        createdAt: "createdOn",
+        updatedAt: "modifiedOn"
+    }
 });
 
-model.export = model(DCOCUMENT_NAME, cartSchema)
+module.exports = {
+    cart: model(DOCUMENT_NAME, cartSchema)
+}
