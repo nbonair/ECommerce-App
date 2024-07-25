@@ -24,7 +24,7 @@ const getAllProducts = async ({ limit, sort, page, filter, select }) => {
     return products
 }
 
-const getProduct = async ({ product_id, unSelect }) => {
+const getProductById = async ({ product_id, unSelect }) => {
     return product.findById(new Types.ObjectId(product_id)).select(getUnSelectData(unSelect))
 }
 
@@ -88,7 +88,7 @@ module.exports = {
     findAllDrafts,
     findAllPublished,
     getAllProducts,
-    getProduct,
+    getProductById,
     publishProduct,
     archivedProduct,
     searchProductPublic,

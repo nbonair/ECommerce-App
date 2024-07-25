@@ -1,6 +1,6 @@
 const { product, clothing, electronic, furniture } = require('../models/product.model')
 const { BadRequestError } = require('../../core/error.response')
-const { findAllDrafts, publishProduct, findAllPublished, archivedProduct, searchProductPublic, getAllProducts, getProduct, updateProductById } = require('../models/repositories/product.repo')
+const { findAllDrafts, publishProduct, findAllPublished, archivedProduct, searchProductPublic, getAllProducts, updateProductById, getProductById } = require('../models/repositories/product.repo')
 const shopModel = require('../models/shop.model')
 const { truncate } = require('lodash')
 const { validateNestedObjectParser, updateNestedObjectParse } = require('../utils')
@@ -57,7 +57,7 @@ class ProductFactory {
     }
 
     static async getProduct({ product_id }) {
-        return await getProduct({ product_id, unSelect: ['__v', 'product_variations'] })
+        return await getProductById({ product_id, unSelect: ['__v', 'product_variations'] })
     }
 }
 
