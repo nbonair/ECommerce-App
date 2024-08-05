@@ -5,7 +5,7 @@ const { getProductById } = require('../models/repositories/product.repo');
 
 class CartServices {
 
-    static async createUserCart({ userId, product }) {
+    static async createCart({ userId, product }) {
         const query = { cart_userId: userId, cart_state: 'active' }
         const updateOrInsert = {
             $addToSet: {
@@ -17,7 +17,7 @@ class CartServices {
         return await cart.findOneAndUpdate(query, update, options)
     }
 
-    static async updateUserCartQuantity({ userId, product }) {
+    static async updateCartQuantity({ userId, product }) {
         const { productId, quantity } = product
         const query = {
             cart_userId: userId,
@@ -35,7 +35,7 @@ class CartServices {
     static async addToCart({ userId, product = {} }) {
         const userCart = await cart.findOne({ cart_userId: userId }).lean();
         if (!userCart) {
-            return await CartServices.createUserCart({ userId, product })
+            return await CartServices.createCart({ userId, product })
         }
 
         if (!userCart.cart_products.length) {
@@ -43,7 +43,7 @@ class CartServices {
             return await userCart.save()
         }
 
-        return await CartServices.updateUserCartQuantity({ userId, product })
+        return await CartServices.updateCartQuantity({ userId, product })
     }
 
 
@@ -76,10 +76,10 @@ class CartServices {
         if (foundProduct.product_shop.toString() !== shop_order_ids[0]?.shopId) throw new NotFoundError('Product does not belongs to shop');
 
         if (quantity === 0) {
-            await CartServices.deleteUserCart()
+            await CartServices.deleteCartItem()
         }
 
-        return await CartServices.updateUserCartQuantity({
+        return await CartServices.updateCartQuantity({
             userId,
             product: {
                 productId,
@@ -88,7 +88,7 @@ class CartServices {
         })
     }
 
-    static async deleteUserCart({ userId, productId }) {
+    static async deleteCartItem({ userId, productId }) {
         const query = { cart_userId: userId, cart_state: 'active' },
             updateSet = {
                 $pull: {
@@ -103,7 +103,7 @@ class CartServices {
         return deleteCart
     }
 
-    static async getListernUserCart({ userId }) {
+    static async getUserCart({ userId }) {
         return await cart.findOne(
             {
                 cart_userId: +userId,
@@ -112,4 +112,4 @@ class CartServices {
 }
 
 
-module.exports = CartServices
+module.exports = CartServices;
