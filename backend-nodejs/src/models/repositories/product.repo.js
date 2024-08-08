@@ -42,11 +42,11 @@ const searchProductPublic = async ({ keySearch }) => {
 
 //Patch
 
-const updateProductById = async({productId, payload, model, isNew = true}) =>{
+const updateProductById = async ({ productId, payload, model, isNew = true }) => {
     return await model.findByIdAndUpdate(productId, payload, {
         new: isNew
     })
-    
+
 }
 
 //Post
@@ -84,6 +84,19 @@ const queryAllProduct = async ({ query, limit, skip }) => {
         .lean()
 }
 
+const validateProductDetails = async (products) => {
+    return await Promise.all(products.map(async product => {
+        const foundProduct = await getProductById(product.productId);
+        if (foundProduct) {
+            return {
+                price: foundProduct.product_price,
+                quantity: product.quantity,
+                productId: product.productId
+            };
+        }
+    }))
+}
+
 module.exports = {
     findAllDrafts,
     findAllPublished,
@@ -93,5 +106,6 @@ module.exports = {
     archivedProduct,
     searchProductPublic,
     updateProductById,
-    queryAllProduct
+    queryAllProduct,
+    validateProductDetails
 }
